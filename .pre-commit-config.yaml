@@ -67,3 +67,12 @@ repos:
         entry: sh -c 'npx jest --passWithNoTests --bail --silent 2>/dev/null || true'
         language: system
         pass_filenames: false
+
+  - repo: local
+    hooks:
+      - id: jest-coverage-push
+        name: Jest Coverage Threshold (Industry Standard)
+        entry: bash -c 'npx jest --coverage --passWithNoTests; exit $?'
+        language: system
+        pass_filenames: false
+        stages: [pre-push]
