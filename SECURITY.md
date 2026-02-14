@@ -32,7 +32,7 @@ pre-commit install
 Create `.env` file (never commit):
 ```bash
 # Database
-DATABASE_URL=postgresql://user:password@localhost:5432/autoloan_development
+DATABASE_URL=postgresql://user:password@localhost:5432/autoloan_development # pragma: allowlist secret
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=autoloan_development
