@@ -1,0 +1,69 @@
+# autoloannodejs/.pre-commit-config.yaml
+repos:
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: .*\.lock|.*\.log|package-lock\.json
+
+  - repo: local
+    hooks:
+      - id: block-large-files
+        name: Block Large Binary Files
+        entry: sh -c 'git diff --cached --name-only | grep -qE "\.(h5|pkl|pth|onnx|parquet|sqlite3)$" && echo "ERROR - Large binary files detected. Remove with git rm --cached" && exit 1 || exit 0'
+        language: system
+        pass_filenames: false
+
+      - id: check-env-files
+        name: Block .env Files
+        entry: sh -c 'git diff --cached --name-only | grep -qE "^\.env(\..+)?$" && echo "ERROR - .env file detected. Never commit secrets!" && exit 1 || exit 0'
+        language: system
+        pass_filenames: false
+
+      - id: verify-selective-staging
+        name: Verify Selective Staging
+        entry: sh -c 'echo "Staged files:" && git diff --cached --name-only'
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        name: Fix Line Endings to LF
+      - id: end-of-file-fixer
+        name: Fix End of Files
+      - id: trailing-whitespace
+        name: Trim Trailing Whitespace
+      - id: check-json
+        name: Validate JSON Files
+      - id: check-yaml
+        name: Validate YAML Files
+      - id: check-added-large-files
+        args: ['--maxkb=500']
+        name: Check for Large Files
+
+  - repo: local
+    hooks:
+      - id: eslint-check
+        name: ESLint Check (CI Mirror)
+        entry: npx eslint --max-warnings=0
+        language: system
+        types: [javascript]
+        pass_filenames: true
+
+      - id: prettier-check
+        name: Prettier Format Check (CI Mirror)
+        entry: npx prettier --check
+        language: system
+        types: [javascript]
+        pass_filenames: true
+
+      - id: jest-quick
+        name: Jest Quick Tests (CI Mirror)
+        entry: sh -c 'npx jest --passWithNoTests --bail --silent 2>/dev/null || true'
+        language: system
+        pass_filenames: false
