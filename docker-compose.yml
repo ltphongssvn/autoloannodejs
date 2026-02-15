@@ -25,15 +25,24 @@ services:
       - '3000:3000'
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgres://postgres:postgres@db:5432/autoloan_development
-      JWT_SECRET: dev-secret-change-in-production
+      DB_NAME: autoloan_development
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      PORT: 3000
+      JWT_SECRET: docker-integration-test-secret-key # pragma: allowlist secret
+      FRONTEND_URL: http://localhost:5173
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - .:/app
       - /app/node_modules
-    command: npm run dev
+    command: >
+      sh -c "npx sequelize-cli db:migrate --migrations-path src/migrations &&
+             npx sequelize-cli db:seed:all --seeders-path src/seeders 2>/dev/null;
+             node src/server.js"
 
 volumes:
   pgdata:
