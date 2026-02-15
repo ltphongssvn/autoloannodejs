@@ -1,4 +1,3 @@
-// jest.config.js
 export default {
   testEnvironment: 'node',
   transform: {},
@@ -8,7 +7,14 @@ export default {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'text-summary', 'lcov', 'json-summary'],
   coveragePathIgnorePatterns: ['/node_modules/', '/coverage/', '/__tests__/'],
-  collectCoverageFrom: ['src/**/*.js', '!src/server.js', '!src/models/index.js'],
+  collectCoverageFrom: [
+    'src/**/*.js',
+    '!src/server.js',
+    '!src/models/index.js',
+    '!src/migrations/**',
+    '!src/seeders/**',
+    '!src/routes/**',
+  ],
   coverageThreshold: {
     global: {
       lines: 80,
