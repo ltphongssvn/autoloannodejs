@@ -6,6 +6,7 @@ import documentRoutes from './documents.js';
 import loanOfficerRoutes from './loanOfficer.js';
 import underwriterRoutes from './underwriter.js';
 import userRoutes from './users.js';
+import apiKeyRoutes from './apiKeys.js';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ router.use('/', documentRoutes);
 router.use('/loan-officer/applications', loanOfficerRoutes);
 router.use('/underwriter/applications', underwriterRoutes);
 router.use('/users', userRoutes);
+router.use('/api-keys', apiKeyRoutes);
 
 router.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
