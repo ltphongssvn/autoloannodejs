@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "node --watch src/server.js",
     "test": "NODE_OPTIONS=--experimental-vm-modules jest --verbose",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage",
     "lint": "eslint src/",
@@ -14,7 +14,9 @@
     "format": "prettier --write 'src/**/*.js'",
     "db:migrate": "npx sequelize-cli db:migrate",
     "db:seed": "npx sequelize-cli db:seed:all",
-    "db:reset": "npx sequelize-cli db:migrate:undo:all && npx sequelize-cli db:migrate && npx sequelize-cli db:seed:all"
+    "db:reset": "npm run db:migrate:undo && npm run db:migrate && npm run db:seed",
+    "db:migrate:undo": "npx sequelize-cli db:migrate:undo",
+    "db:seed:undo": "npx sequelize-cli db:seed:undo:all"
   },
   "repository": {
     "type": "git",
