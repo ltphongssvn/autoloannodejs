@@ -10,6 +10,11 @@ import apiKeyRoutes from './apiKeys.js';
 
 const router = Router();
 
+// Public
+router.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 router.use('/auth', authRoutes);
 router.use('/applications', applicationRoutes);
 router.use('/', documentRoutes);
@@ -17,9 +22,5 @@ router.use('/loan-officer/applications', loanOfficerRoutes);
 router.use('/underwriter/applications', underwriterRoutes);
 router.use('/users', userRoutes);
 router.use('/api-keys', apiKeyRoutes);
-
-router.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
-});
 
 export default router;

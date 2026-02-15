@@ -2,6 +2,7 @@
 import js from '@eslint/js';
 
 export default [
+  { ignores: ['**/*.cjs'] },
   js.configs.recommended,
   {
     languageOptions: {

@@ -1,7 +1,5 @@
 // src/models/index.js
-// Maps: app/models/application_record.rb + all model requires
-import Sequelize from 'sequelize';
-import databaseConfig from '../config/database.js';
+import { sequelize } from '../config/database.js';
 import UserModel from './User.js';
 import ApplicationModel from './Application.js';
 import DocumentModel from './Document.js';
@@ -13,13 +11,6 @@ import StatusHistoryModel from './StatusHistory.js';
 import ApiKeyModel from './ApiKey.js';
 import SecurityAuditLogModel from './SecurityAuditLog.js';
 import JwtDenylistModel from './JwtDenylist.js';
-
-const env = process.env.NODE_ENV || 'development';
-const config = databaseConfig[env] || databaseConfig.development;
-
-const sequelize = config.use_env_variable
-  ? new Sequelize.Sequelize(process.env[config.use_env_variable], config)
-  : new Sequelize.Sequelize(config.database, config.username, config.password, config);
 
 const User = UserModel(sequelize);
 const Application = ApplicationModel(sequelize);
