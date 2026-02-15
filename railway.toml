@@ -3,7 +3,6 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "npx sequelize-cli db:migrate --migrations-path src/migrations 2>&1 || true; echo 'Starting node...'; node src/server.js 2>&1 || echo 'Node exited with code:' $?"
 healthcheckPath = "/api/v1/health"
 healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"

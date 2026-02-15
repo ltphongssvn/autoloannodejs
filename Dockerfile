@@ -14,4 +14,5 @@ RUN npm ci
 CMD ["npm", "test"]
 
 FROM base AS production
-CMD ["node", "src/server.js"]
+RUN npm ci
+CMD ["sh", "-c", "npx sequelize-cli db:migrate --migrations-path src/migrations 2>&1 || true; node src/server.js"]
