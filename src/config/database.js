@@ -1,7 +1,6 @@
 // src/config/database.js
 import { Sequelize } from 'sequelize';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const env = process.env.NODE_ENV || 'development';
@@ -15,12 +14,7 @@ const config = {
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
     logging: console.log,
-    pool: {
-      max: parseInt(process.env.DB_POOL_MAX || '5', 10),
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
+    pool: { max: 5, min: 0, acquire: 30000, idle: 10000 },
   },
   test: {
     database: process.env.DB_NAME || 'autoloan_test',
@@ -30,29 +24,17 @@ const config = {
     port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
     logging: false,
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000,
-    },
+    pool: { max: 5, min: 0, acquire: 30000, idle: 10000 },
   },
   production: {
-    url: process.env.DATABASE_URL,
+    database: process.env.DB_NAME,
+    username: process.env.DB_USER || 'postgres',
+    password: process.env.DB_PASSWORD,
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT || 5432,
     dialect: 'postgres',
     logging: false,
-    pool: {
-      max: parseInt(process.env.DB_POOL_MAX || '10', 10),
-      min: 2,
-      acquire: 30000,
-      idle: 10000,
-    },
-    dialectOptions: {
-      ssl: {
-        require: true,
-        rejectUnauthorized: false,
-      },
-    },
+    pool: { max: 10, min: 2, acquire: 30000, idle: 10000 },
   },
 };
 
