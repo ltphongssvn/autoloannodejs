@@ -16,5 +16,23 @@ export default {
       functions: 80,
       statements: 80,
     },
+    './src/models/': {
+      lines: 85,
+      branches: 90,
+      functions: 80,
+      statements: 85,
+    },
+    './src/middleware/': {
+      lines: 90,
+      branches: 90,
+      functions: 90,
+      statements: 90,
+    },
+    './src/config/': {
+      lines: 70,
+      branches: 50,
+      functions: 80,
+      statements: 70,
+    },
   },
 };
