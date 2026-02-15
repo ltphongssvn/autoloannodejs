@@ -3,8 +3,8 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
-startCommand = "npx sequelize-cli db:migrate --migrations-path src/migrations && npx sequelize-cli db:seed:all --seeders-path src/seeders 2>/dev/null; node src/server.js"
+startCommand = "npx sequelize-cli db:migrate --migrations-path src/migrations || true && npx sequelize-cli db:seed:all --seeders-path src/seeders || true && node src/server.js"
 healthcheckPath = "/api/v1/health"
-healthcheckTimeout = 30
+healthcheckTimeout = 60
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
