@@ -32,7 +32,7 @@ app.use(errorHandler);
 // Start server
 const PORT = appConfig.port;
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     logger.info(`AutoLoan API server running on port ${PORT}`);
     logger.info(`Environment: ${appConfig.env}`);
   });
