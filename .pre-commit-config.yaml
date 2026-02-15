@@ -64,7 +64,7 @@ repos:
 
       - id: jest-quick
         name: Jest Quick Tests (CI Mirror)
-        entry: sh -c 'npx jest --passWithNoTests --bail --silent 2>/dev/null || true'
+        entry: bash -c 'NODE_OPTIONS=--experimental-vm-modules npx jest --passWithNoTests --bail --silent 2>/dev/null || true'
         language: system
         pass_filenames: false
 
@@ -72,7 +72,7 @@ repos:
     hooks:
       - id: jest-coverage-push
         name: Jest Coverage Threshold (Industry Standard)
-        entry: bash -c 'npx jest --coverage --passWithNoTests; exit $?'
+        entry: bash -c 'NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --passWithNoTests; exit $?'
         language: system
         pass_filenames: false
         stages: [pre-push]
