@@ -72,7 +72,7 @@ repos:
     hooks:
       - id: jest-coverage-push
         name: Jest Coverage Threshold (Industry Standard)
-        entry: bash -c 'NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --passWithNoTests; exit $?'
+        entry: bash -c 'echo "Running full test suite with coverage..." && NODE_OPTIONS=--experimental-vm-modules npx jest --coverage --verbose 2>&1 | tee /tmp/jest-coverage.log | tail -40 && grep -q "Test Suites:.*failed" /tmp/jest-coverage.log && exit 1 || grep -q "not met" /tmp/jest-coverage.log && exit 1 || exit 0'
         language: system
         pass_filenames: false
         stages: [pre-push]
