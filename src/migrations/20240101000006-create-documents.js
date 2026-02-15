@@ -17,6 +17,7 @@ export async function up(queryInterface, Sequelize) {
     verified_at: { type: Sequelize.DATE },
     verified_by_id: { type: Sequelize.BIGINT, references: { model: 'users', key: 'id' } },
     rejection_note: { type: Sequelize.TEXT },
+    request_note: { type: Sequelize.TEXT },
     created_at: { type: Sequelize.DATE, allowNull: false },
     updated_at: { type: Sequelize.DATE, allowNull: false },
   });

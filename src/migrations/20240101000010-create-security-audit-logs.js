@@ -5,6 +5,8 @@ export async function up(queryInterface, Sequelize) {
     event_type: { type: Sequelize.STRING(50), allowNull: false },
     ip_address: { type: Sequelize.STRING(45) },
     user_agent: { type: Sequelize.TEXT },
+    resource_type: { type: Sequelize.STRING(50) },
+    resource_id: { type: Sequelize.BIGINT },
     metadata: { type: Sequelize.JSONB },
     success: { type: Sequelize.BOOLEAN, defaultValue: true },
     created_at: { type: Sequelize.DATE, allowNull: false },
