@@ -1,4 +1,6 @@
 // src/__tests__/middleware/errorHandler.test.js
+import { jest } from '@jest/globals';
+
 const { AppError, ValidationError, NotFoundError } = await import('../../utils/errors.js');
 const { errorHandler } = await import('../../middleware/errorHandler.js');
 
