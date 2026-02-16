@@ -1,15 +1,15 @@
-// frontend/jest.config.ts
-import type { Config } from 'jest';
+// frontend/jest.config.mjs
 import nextJest from 'next/jest.js';
 
 const createJestConfig = nextJest({
   dir: './',
 });
 
-const config: Config = {
+/** @type {import('jest').Config} */
+const config = {
   displayName: 'frontend',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/test/setup.ts'],
+  setupFilesAfterSetup: ['<rootDir>/src/test/setup.ts'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
