@@ -31,7 +31,7 @@ beforeEach(() => {
 describe('ResetPasswordPage', () => {
   it('renders form with password fields', () => {
     render(<ResetPasswordPage />);
-    expect(screen.getByText('Reset Password')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Reset Password' })).toBeInTheDocument();
     expect(screen.getByLabelText('New Password')).toBeInTheDocument();
     expect(screen.getByLabelText('Confirm New Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reset Password' })).toBeInTheDocument();

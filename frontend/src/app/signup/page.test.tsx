@@ -50,7 +50,7 @@ const fillForm = async () => {
 describe('SignupPage', () => {
   it('renders signup form with all fields', () => {
     render(<SignupPage />);
-    expect(screen.getByText('Create Account')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Create Account' })).toBeInTheDocument();
     expect(screen.getByLabelText('First Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Last Name')).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
