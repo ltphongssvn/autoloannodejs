@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { getApplication } from '@/services/applications';
-import { LoadingSpinner, ErrorAlert, StatusChip } from '@/components/common';
+import { LoadingSpinner, ErrorAlert, StatusChip, DocumentManager } from '@/components/common';
 import type { Application } from '@/types';
 
 export default function ApplicationDetailPage() {
@@ -120,7 +120,13 @@ export default function ApplicationDetailPage() {
           </dl>
         </section>
 
-        {/* Timestamps */}
+        {/* Documents */}
+        <section className="rounded-lg border bg-white p-6">
+          <h2 className="mb-3 text-lg font-semibold text-gray-800">Documents</h2>
+          <DocumentManager applicationId={application.id} />
+        </section>
+
+        {/* Timeline */}
         <section className="rounded-lg border bg-white p-6">
           <h2 className="mb-3 text-lg font-semibold text-gray-800">Timeline</h2>
           <dl className="space-y-2 text-sm">
@@ -148,6 +154,19 @@ export default function ApplicationDetailPage() {
             )}
           </dl>
         </section>
+
+        {/* Agreement Link */}
+        {application.status === 'approved' && !application.signed_at && (
+          <div className="rounded-lg border border-green-200 bg-green-50 p-6 text-center">
+            <p className="mb-3 text-green-700">Your loan has been approved!</p>
+            <Link
+              href={`/applications/${application.id}/agreement`}
+              className="inline-block rounded-md bg-green-600 px-6 py-2 text-white hover:bg-green-700"
+            >
+              Review & Sign Agreement
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="mt-6">
