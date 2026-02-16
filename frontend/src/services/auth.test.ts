@@ -21,11 +21,16 @@ describe('login', () => {
       headers: new Headers(),
     });
 
-    const result = await login({ email: 'test@example.com', password: 'pass' }); //pragma: allowlist secret
+    const result = await login({
+      email: 'test@example.com',
+      password: 'pass', //pragma: allowlist secret
+    });
     expect(result).toEqual(mockUser);
     expect(mockApiFetch).toHaveBeenCalledWith('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ user: { email: 'test@example.com', password: 'pass' } }),
+      body: JSON.stringify({
+        user: { email: 'test@example.com', password: 'pass' }, //pragma: allowlist secret
+      }),
     });
   });
 });
@@ -61,14 +66,16 @@ describe('logout', () => {
     });
 
     await logout();
-    expect(mockApiFetch).toHaveBeenCalledWith('/auth/logout', { method: 'DELETE' });
+    expect(mockApiFetch).toHaveBeenCalledWith('/auth/logout', {
+      method: 'DELETE',
+    });
     expect(setAuthToken).toHaveBeenCalledWith(null);
   });
 
   it('clears token even if API call fails', async () => {
     mockApiFetch.mockRejectedValue(new Error('Network error'));
 
-    await logout();
+    await expect(logout()).rejects.toThrow('Network error');
     expect(setAuthToken).toHaveBeenCalledWith(null);
   });
 });
