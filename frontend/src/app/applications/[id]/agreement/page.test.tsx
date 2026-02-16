@@ -1,5 +1,5 @@
 // frontend/src/app/applications/[id]/agreement/page.test.tsx
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import LoanAgreementPage from './page';
 import { useAuth } from '@/context/AuthContext';
@@ -46,7 +46,6 @@ beforeEach(() => {
   mockUseAuth.mockReturnValue({
     user: mockUser, setUser: jest.fn(), isAuthenticated: true, isLoading: false, logout: jest.fn(),
   });
-  // Mock canvas getContext
   HTMLCanvasElement.prototype.getContext = jest.fn().mockReturnValue({
     beginPath: jest.fn(),
     moveTo: jest.fn(),
@@ -55,7 +54,16 @@ beforeEach(() => {
     clearRect: jest.fn(),
   });
   HTMLCanvasElement.prototype.toDataURL = jest.fn().mockReturnValue('data:image/png;base64,sig');
+  HTMLCanvasElement.prototype.getBoundingClientRect = jest.fn().mockReturnValue({
+    left: 0, top: 0, right: 500, bottom: 150, width: 500, height: 150, x: 0, y: 0, toJSON: jest.fn(),
+  });
 });
+
+const simulateSignature = (canvas: HTMLElement) => {
+  fireEvent.mouseDown(canvas, { clientX: 10, clientY: 10 });
+  fireEvent.mouseMove(canvas, { clientX: 50, clientY: 50 });
+  fireEvent.mouseUp(canvas);
+};
 
 describe('LoanAgreementPage', () => {
   it('shows loading while auth loading', () => {
@@ -107,27 +115,24 @@ describe('LoanAgreementPage', () => {
 
     await userEvent.click(screen.getByRole('checkbox'));
 
-    // Simulate drawing on canvas
-    const canvas = screen.getByTestId('signature-canvas');
-    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: 10, clientY: 10, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 50, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    await act(async () => {
+      simulateSignature(screen.getByTestId('signature-canvas'));
+    });
 
     expect(screen.getByText('Sign & Submit')).not.toBeDisabled();
   });
 
   it('submits signature and redirects', async () => {
     mockGetApplication.mockResolvedValue(approvedApp);
-    mockSignApplication.mockResolvedValue({ ...approvedApp, status: 'pending', signed_at: '2024-07-01T00:00:00Z' });
+    mockSignApplication.mockResolvedValue({ ...approvedApp, signed_at: '2024-07-01T00:00:00Z' });
 
     render(<LoanAgreementPage />);
     await waitFor(() => expect(screen.getByText('Sign Agreement')).toBeInTheDocument());
 
     await userEvent.click(screen.getByRole('checkbox'));
-    const canvas = screen.getByTestId('signature-canvas');
-    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: 10, clientY: 10, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 50, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    await act(async () => {
+      simulateSignature(screen.getByTestId('signature-canvas'));
+    });
 
     await userEvent.click(screen.getByText('Sign & Submit'));
 
@@ -145,10 +150,9 @@ describe('LoanAgreementPage', () => {
     await waitFor(() => expect(screen.getByText('Sign Agreement')).toBeInTheDocument());
 
     await userEvent.click(screen.getByRole('checkbox'));
-    const canvas = screen.getByTestId('signature-canvas');
-    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: 10, clientY: 10, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 50, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    await act(async () => {
+      simulateSignature(screen.getByTestId('signature-canvas'));
+    });
 
     await userEvent.click(screen.getByText('Sign & Submit'));
 
@@ -185,13 +189,11 @@ describe('LoanAgreementPage', () => {
 
     await waitFor(() => expect(screen.getByText('Sign Agreement')).toBeInTheDocument());
 
-    const canvas = screen.getByTestId('signature-canvas');
-    canvas.dispatchEvent(new MouseEvent('mousedown', { clientX: 10, clientY: 10, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mousemove', { clientX: 50, clientY: 50, bubbles: true }));
-    canvas.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+    await act(async () => {
+      simulateSignature(screen.getByTestId('signature-canvas'));
+    });
 
     await userEvent.click(screen.getByText('Clear Signature'));
-    // After clearing, submit should be disabled again (even if checkbox is checked)
     await userEvent.click(screen.getByRole('checkbox'));
     expect(screen.getByText('Sign & Submit')).toBeDisabled();
   });
