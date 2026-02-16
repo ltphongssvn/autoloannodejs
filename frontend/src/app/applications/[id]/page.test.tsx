@@ -105,28 +105,35 @@ describe('ApplicationDetailPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Application AL-001')).toBeInTheDocument();
-      expect(screen.getByText('Submitted')).toBeInTheDocument();
-      expect(screen.getByText('Personal Information')).toBeInTheDocument();
-      expect(screen.getByText('John')).toBeInTheDocument();
-      expect(screen.getByText('Doe')).toBeInTheDocument();
-      expect(screen.getByText('Vehicle Details')).toBeInTheDocument();
-      expect(screen.getByText('Toyota')).toBeInTheDocument();
-      expect(screen.getByText('Loan Details')).toBeInTheDocument();
-      expect(screen.getByText('36 months')).toBeInTheDocument();
-      expect(screen.getByText('5.9%')).toBeInTheDocument();
-      expect(screen.getByText('$450.00')).toBeInTheDocument();
-      expect(screen.getByText('Timeline')).toBeInTheDocument();
     });
+
+    expect(screen.getByTestId('status-chip')).toHaveTextContent('Submitted');
+    expect(screen.getByText('Personal Information')).toBeInTheDocument();
+    expect(screen.getByText('John')).toBeInTheDocument();
+    expect(screen.getByText('Doe')).toBeInTheDocument();
+    expect(screen.getByText('Vehicle Details')).toBeInTheDocument();
+    expect(screen.getByText('Toyota')).toBeInTheDocument();
+    expect(screen.getByText('Loan Details')).toBeInTheDocument();
+    expect(screen.getByText('36 months')).toBeInTheDocument();
+    expect(screen.getByText('5.9%')).toBeInTheDocument();
+    expect(screen.getByText('$450.00')).toBeInTheDocument();
+    expect(screen.getByText('Timeline')).toBeInTheDocument();
   });
 
-  it('shows submitted timestamp when present', async () => {
+  it('shows timeline timestamps when present', async () => {
     mockGetApplication.mockResolvedValue(mockApp);
 
     render(<ApplicationDetailPage />);
 
     await waitFor(() => {
-      expect(screen.getByText('Submitted')).toBeInTheDocument();
+      expect(screen.getByText('Application AL-001')).toBeInTheDocument();
     });
+
+    // Timeline has both "Created" and "Submitted" labels
+    expect(screen.getByText('Created')).toBeInTheDocument();
+    // "Submitted" appears in both StatusChip and Timeline - use getAllByText
+    const submittedElements = screen.getAllByText('Submitted');
+    expect(submittedElements.length).toBeGreaterThanOrEqual(2);
   });
 
   it('shows error when fetch fails', async () => {
