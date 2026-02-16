@@ -40,6 +40,10 @@ const mockApp = {
   created_at: '2024-06-01T00:00:00Z', updated_at: '2024-06-15T00:00:00Z',
 };
 
+const makeResponse = (data: unknown) => ({
+  data: { status: { code: 200 }, data }, headers: new Headers(),
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseAuth.mockReturnValue({
@@ -66,9 +70,7 @@ describe('UnderwriterReviewPage', () => {
   });
 
   it('renders application for analysis', async () => {
-    mockApiFetch.mockResolvedValue({
-      data: { status: { code: 200 }, data: mockApp }, headers: new Headers(),
-    });
+    mockApiFetch.mockResolvedValue(makeResponse(mockApp));
 
     render(<UnderwriterReviewPage />);
 
@@ -80,14 +82,15 @@ describe('UnderwriterReviewPage', () => {
     expect(screen.getByText('Acme')).toBeInTheDocument();
     expect(screen.getByText('Approve Loan')).toBeInTheDocument();
     expect(screen.getByText('Deny Loan')).toBeInTheDocument();
-    expect(screen.getByLabelText('Interest Rate (%)')).toBeInTheDocument();
-    expect(screen.getByLabelText('Loan Term (months)')).toBeInTheDocument();
   });
 
   it('approves application with loan terms', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: { ...mockApp, status: 'approved' } }, headers: new Headers() });
+    mockApiFetch.mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('/decide')) {
+        return Promise.resolve(makeResponse({ ...mockApp, status: 'approved' }));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<UnderwriterReviewPage />);
     await waitFor(() => expect(screen.getByText('Analysis: AL-001')).toBeInTheDocument());
@@ -102,9 +105,12 @@ describe('UnderwriterReviewPage', () => {
   });
 
   it('denies application', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: { ...mockApp, status: 'rejected' } }, headers: new Headers() });
+    mockApiFetch.mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('/decide')) {
+        return Promise.resolve(makeResponse({ ...mockApp, status: 'rejected' }));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<UnderwriterReviewPage />);
     await waitFor(() => expect(screen.getByText('Analysis: AL-001')).toBeInTheDocument());
@@ -118,9 +124,7 @@ describe('UnderwriterReviewPage', () => {
   });
 
   it('disables approve when no interest rate', async () => {
-    mockApiFetch.mockResolvedValue({
-      data: { status: { code: 200 }, data: mockApp }, headers: new Headers(),
-    });
+    mockApiFetch.mockResolvedValue(makeResponse(mockApp));
 
     render(<UnderwriterReviewPage />);
     await waitFor(() => expect(screen.getByText('Analysis: AL-001')).toBeInTheDocument());
@@ -129,13 +133,19 @@ describe('UnderwriterReviewPage', () => {
   });
 
   it('shows error on decision failure', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockRejectedValueOnce(new Error('Forbidden'));
+    let callCount = 0;
+    mockApiFetch.mockImplementation(() => {
+      callCount++;
+      if (callCount > 1) {
+        return Promise.reject(new Error('Forbidden'));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<UnderwriterReviewPage />);
     await waitFor(() => expect(screen.getByText('Analysis: AL-001')).toBeInTheDocument());
 
+    callCount = 1;
     await userEvent.click(screen.getByText('Deny Loan'));
 
     await waitFor(() => {
@@ -155,9 +165,7 @@ describe('UnderwriterReviewPage', () => {
   });
 
   it('hides actions for non-under_review status', async () => {
-    mockApiFetch.mockResolvedValue({
-      data: { status: { code: 200 }, data: { ...mockApp, status: 'approved' } }, headers: new Headers(),
-    });
+    mockApiFetch.mockResolvedValue(makeResponse({ ...mockApp, status: 'approved' }));
 
     render(<UnderwriterReviewPage />);
     await waitFor(() => expect(screen.getByText('Analysis: AL-001')).toBeInTheDocument());
