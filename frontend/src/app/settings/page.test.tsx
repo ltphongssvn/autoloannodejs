@@ -79,7 +79,7 @@ describe('SettingsPage', () => {
 
   it('renders password change form', () => {
     render(<SettingsPage />);
-    expect(screen.getByText('Change Password')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Change Password' })).toBeInTheDocument();
     expect(screen.getByLabelText('Current Password')).toBeInTheDocument();
     expect(screen.getByLabelText('New Password')).toBeInTheDocument();
   });
@@ -119,7 +119,7 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
     await userEvent.type(screen.getByLabelText('Current Password'), 'oldpass');
     await userEvent.type(screen.getByLabelText('New Password'), 'newpass123');
-    await userEvent.click(screen.getByText('Change Password'));
+    await userEvent.click(screen.getByRole('button', { name: 'Change Password' }));
 
     await waitFor(() => {
       expect(screen.getByText('Password changed successfully')).toBeInTheDocument();
@@ -134,7 +134,7 @@ describe('SettingsPage', () => {
     render(<SettingsPage />);
     await userEvent.type(screen.getByLabelText('Current Password'), 'wrong');
     await userEvent.type(screen.getByLabelText('New Password'), 'newpass');
-    await userEvent.click(screen.getByText('Change Password'));
+    await userEvent.click(screen.getByRole('button', { name: 'Change Password' }));
 
     await waitFor(() => {
       expect(screen.getByText('Wrong password')).toBeInTheDocument();
