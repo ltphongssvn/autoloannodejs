@@ -40,6 +40,10 @@ const mockApp = {
   created_at: '2024-06-01T00:00:00Z', updated_at: '2024-06-15T00:00:00Z',
 };
 
+const makeResponse = (data: unknown) => ({
+  data: { status: { code: 200 }, data }, headers: new Headers(),
+});
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseAuth.mockReturnValue({
@@ -66,9 +70,7 @@ describe('OfficerReviewPage', () => {
   });
 
   it('renders application details for review', async () => {
-    mockApiFetch.mockResolvedValue({
-      data: { status: { code: 200 }, data: mockApp }, headers: new Headers(),
-    });
+    mockApiFetch.mockResolvedValue(makeResponse(mockApp));
 
     render(<OfficerReviewPage />);
 
@@ -84,12 +86,14 @@ describe('OfficerReviewPage', () => {
   });
 
   it('forwards application to underwriting', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: { ...mockApp, status: 'under_review' } }, headers: new Headers() });
+    mockApiFetch.mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('/review')) {
+        return Promise.resolve(makeResponse({ ...mockApp, status: 'under_review' }));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<OfficerReviewPage />);
-
     await waitFor(() => expect(screen.getByText('Review: AL-001')).toBeInTheDocument());
 
     await userEvent.type(screen.getByLabelText('Note'), 'Looks good');
@@ -101,9 +105,12 @@ describe('OfficerReviewPage', () => {
   });
 
   it('requests documents', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: { ...mockApp, status: 'pending_documents' } }, headers: new Headers() });
+    mockApiFetch.mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('/review')) {
+        return Promise.resolve(makeResponse({ ...mockApp, status: 'pending_documents' }));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<OfficerReviewPage />);
     await waitFor(() => expect(screen.getByText('Review: AL-001')).toBeInTheDocument());
@@ -116,9 +123,12 @@ describe('OfficerReviewPage', () => {
   });
 
   it('rejects application', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: { ...mockApp, status: 'rejected' } }, headers: new Headers() });
+    mockApiFetch.mockImplementation((url: string) => {
+      if (typeof url === 'string' && url.includes('/review')) {
+        return Promise.resolve(makeResponse({ ...mockApp, status: 'rejected' }));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<OfficerReviewPage />);
     await waitFor(() => expect(screen.getByText('Review: AL-001')).toBeInTheDocument());
@@ -131,13 +141,19 @@ describe('OfficerReviewPage', () => {
   });
 
   it('shows error on action failure', async () => {
-    mockApiFetch
-      .mockResolvedValueOnce({ data: { status: { code: 200 }, data: mockApp }, headers: new Headers() })
-      .mockRejectedValueOnce(new Error('Forbidden'));
+    let callCount = 0;
+    mockApiFetch.mockImplementation(() => {
+      callCount++;
+      if (callCount > 1) {
+        return Promise.reject(new Error('Forbidden'));
+      }
+      return Promise.resolve(makeResponse(mockApp));
+    });
 
     render(<OfficerReviewPage />);
     await waitFor(() => expect(screen.getByText('Review: AL-001')).toBeInTheDocument());
 
+    callCount = 1; // Reset so next call rejects
     await userEvent.click(screen.getByText('Forward to Underwriting'));
 
     await waitFor(() => {
@@ -157,9 +173,7 @@ describe('OfficerReviewPage', () => {
   });
 
   it('hides actions for non-actionable statuses', async () => {
-    mockApiFetch.mockResolvedValue({
-      data: { status: { code: 200 }, data: { ...mockApp, status: 'approved' } }, headers: new Headers(),
-    });
+    mockApiFetch.mockResolvedValue(makeResponse({ ...mockApp, status: 'approved' }));
 
     render(<OfficerReviewPage />);
 
