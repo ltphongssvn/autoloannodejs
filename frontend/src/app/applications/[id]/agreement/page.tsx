@@ -14,13 +14,13 @@ export default function LoanAgreementPage() {
   const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isDrawingRef = useRef(false);
   const [application, setApplication] = useState<Application | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [hasSigned, setHasSigned] = useState(false);
-  const [isDrawing, setIsDrawing] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -48,14 +48,14 @@ export default function LoanAgreementPage() {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    setIsDrawing(true);
+    isDrawingRef.current = true;
     const rect = canvas.getBoundingClientRect();
     ctx.beginPath();
     ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
+    if (!isDrawingRef.current) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
@@ -69,7 +69,9 @@ export default function LoanAgreementPage() {
     setHasSigned(true);
   };
 
-  const stopDrawing = () => setIsDrawing(false);
+  const stopDrawing = () => {
+    isDrawingRef.current = false;
+  };
 
   const clearSignature = () => {
     const canvas = canvasRef.current;
