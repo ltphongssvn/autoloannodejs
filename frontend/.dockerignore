@@ -1,0 +1,12 @@
+node_modules
+.next
+coverage
+.env
+.env.local
+*.test.tsx
+*.test.ts
+src/test
+.git
+.gitignore
+README.md
+jest.config.mjs

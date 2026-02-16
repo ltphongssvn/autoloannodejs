@@ -4,45 +4,44 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: autoloan_development
+      POSTGRES_USER: ${DB_USER:-autoloan}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-autoloan_dev}
+      POSTGRES_DB: ${DB_NAME:-autoloan_development}
     ports:
-      - '5432:5432'
+      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-autoloan}"]
       interval: 5s
       timeout: 3s
       retries: 5
 
-  api:
+  backend:
     build:
       context: .
-      target: dev
-    ports:
-      - '3000:3000'
+      dockerfile: Dockerfile
     environment:
-      NODE_ENV: development
-      DB_NAME: autoloan_development
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      DB_HOST: db
-      DB_PORT: 5432
-      PORT: 3000
-      JWT_SECRET: docker-integration-test-secret-key # pragma: allowlist secret
-      FRONTEND_URL: http://localhost:5173
+      NODE_ENV: production
+      DATABASE_URL: postgres://${DB_USER:-autoloan}:${DB_PASSWORD:-autoloan_dev}@db:5432/${DB_NAME:-autoloan_development}
+      JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
+      PORT: 3001
+    ports:
+      - "3001:3001"
     depends_on:
       db:
         condition: service_healthy
-    volumes:
-      - .:/app
-      - /app/node_modules
-    command: >
-      sh -c "npx sequelize-cli db:migrate --migrations-path src/migrations &&
-             npx sequelize-cli db:seed:all --seeders-path src/seeders 2>/dev/null;
-             node src/server.js"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:3001
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
 
 volumes:
   pgdata:
