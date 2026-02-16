@@ -16,73 +16,69 @@ jest.mock('next/link', () => {
 
 const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 
-beforeEach(() => {
-  jest.clearAllMocks();
+const makeUser = (role: 'customer' | 'loan_officer' | 'underwriter') => ({
+  id: 1,
+  email: 'test@example.com',
+  first_name: 'Test',
+  last_name: 'User',
+  phone: null,
+  role,
+  full_name: 'Test User',
+  created_at: '2024-01-01',
 });
 
-describe('Navbar', () => {
-  it('renders login and signup links when not authenticated', () => {
-    mockUseAuth.mockReturnValue({
-      user: null,
-      setUser: jest.fn(),
-      isAuthenticated: false,
-      isLoading: false,
-      logout: jest.fn(),
-    });
+const authState = (role?: 'customer' | 'loan_officer' | 'underwriter') => ({
+  user: role ? makeUser(role) : null,
+  setUser: jest.fn(),
+  isAuthenticated: !!role,
+  isLoading: false,
+  logout: jest.fn(),
+});
 
+beforeEach(() => jest.clearAllMocks());
+
+describe('Navbar', () => {
+  it('shows login/signup when not authenticated', () => {
+    mockUseAuth.mockReturnValue(authState());
     render(<Navbar />);
-    expect(screen.getByText('AutoLoan')).toBeInTheDocument();
     expect(screen.getByText('Login')).toBeInTheDocument();
     expect(screen.getByText('Sign Up')).toBeInTheDocument();
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
   });
 
-  it('renders dashboard, email, and logout when authenticated', () => {
-    mockUseAuth.mockReturnValue({
-      user: {
-        id: 1,
-        email: 'test@example.com',
-        first_name: 'Test',
-        last_name: 'User',
-        phone: null,
-        role: 'customer',
-        full_name: 'Test User',
-        created_at: '2024-01-01',
-      },
-      setUser: jest.fn(),
-      isAuthenticated: true,
-      isLoading: false,
-      logout: jest.fn(),
-    });
-
+  it('shows dashboard, settings, email, logout when authenticated', () => {
+    mockUseAuth.mockReturnValue(authState('customer'));
     render(<Navbar />);
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByText('test@example.com')).toBeInTheDocument();
     expect(screen.getByText('Logout')).toBeInTheDocument();
     expect(screen.queryByText('Login')).not.toBeInTheDocument();
   });
 
-  it('calls logout when logout button clicked', async () => {
-    const mockLogout = jest.fn();
-    mockUseAuth.mockReturnValue({
-      user: {
-        id: 1,
-        email: 'test@example.com',
-        first_name: 'Test',
-        last_name: 'User',
-        phone: null,
-        role: 'customer',
-        full_name: 'Test User',
-        created_at: '2024-01-01',
-      },
-      setUser: jest.fn(),
-      isAuthenticated: true,
-      isLoading: false,
-      logout: mockLogout,
-    });
+  it('links customer dashboard to /dashboard', () => {
+    mockUseAuth.mockReturnValue(authState('customer'));
+    render(<Navbar />);
+    expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/dashboard');
+  });
 
+  it('links officer dashboard to /officer', () => {
+    mockUseAuth.mockReturnValue(authState('loan_officer'));
+    render(<Navbar />);
+    expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/officer');
+  });
+
+  it('links underwriter dashboard to /underwriter', () => {
+    mockUseAuth.mockReturnValue(authState('underwriter'));
+    render(<Navbar />);
+    expect(screen.getByText('Dashboard').closest('a')).toHaveAttribute('href', '/underwriter');
+  });
+
+  it('calls logout when clicked', async () => {
+    const state = authState('customer');
+    mockUseAuth.mockReturnValue(state);
     render(<Navbar />);
     await userEvent.click(screen.getByText('Logout'));
-    expect(mockLogout).toHaveBeenCalledTimes(1);
+    expect(state.logout).toHaveBeenCalledTimes(1);
   });
 });
