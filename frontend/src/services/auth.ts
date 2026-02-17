@@ -5,7 +5,7 @@ import type { User, ApiResponse, AuthCredentials, SignupData } from '@/types';
 export const login = async (credentials: AuthCredentials): Promise<User> => {
   const { data } = await apiFetch<ApiResponse<User>>('/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ user: credentials }),
+    body: JSON.stringify(credentials),
   });
   return data.data;
 };
@@ -13,7 +13,7 @@ export const login = async (credentials: AuthCredentials): Promise<User> => {
 export const signup = async (userData: SignupData): Promise<User> => {
   const { data } = await apiFetch<ApiResponse<User>>('/auth/signup', {
     method: 'POST',
-    body: JSON.stringify({ user: userData }),
+    body: JSON.stringify(userData),
   });
   return data.data;
 };
