@@ -30,7 +30,7 @@ export default function OfficerReviewPage() {
     const fetchApplication = async () => {
       try {
         const { data } = await apiFetch<ApiResponse<Application>>(
-          `/loan_officer/applications/${id}`,
+          `/loan-officer/applications/${id}`,
         );
         setApplication(data.data);
       } catch (err) {
@@ -51,7 +51,7 @@ export default function OfficerReviewPage() {
 
     try {
       const { data } = await apiFetch<ApiResponse<Application>>(
-        `/loan_officer/applications/${application.id}/review`,
+        `/loan-officer/applications/${application.id}/review`,
         {
           method: 'POST',
           body: JSON.stringify({ action, note }),
