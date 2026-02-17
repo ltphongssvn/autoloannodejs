@@ -1,13 +1,13 @@
 // frontend/src/app/reset-password/page.tsx
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { apiFetch } from '@/services/api';
-import { ErrorAlert } from '@/components/common';
+import { LoadingSpinner, ErrorAlert } from '@/components/common';
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
   const [password, setPassword] = useState('');
@@ -31,7 +31,6 @@ export default function ResetPasswordPage() {
     }
 
     setIsSubmitting(true);
-
     try {
       await apiFetch('/auth/password/reset', {
         method: 'POST',
@@ -49,13 +48,8 @@ export default function ResetPasswordPage() {
     return (
       <div className="mx-auto mt-16 max-w-md text-center">
         <h1 className="mb-4 text-3xl font-bold text-gray-900">Password Reset</h1>
-        <p className="text-gray-600">
-          Your password has been successfully reset.
-        </p>
-        <Link
-          href="/login"
-          className="mt-6 inline-block text-blue-600 hover:underline"
-        >
+        <p className="text-gray-600">Your password has been successfully reset.</p>
+        <Link href="/login" className="mt-6 inline-block text-blue-600 hover:underline">
           Sign In
         </Link>
       </div>
@@ -64,9 +58,7 @@ export default function ResetPasswordPage() {
 
   return (
     <div className="mx-auto mt-16 max-w-md">
-      <h1 className="mb-8 text-center text-3xl font-bold text-gray-900">
-        Reset Password
-      </h1>
+      <h1 className="mb-8 text-center text-3xl font-bold text-gray-900">Reset Password</h1>
 
       {error && (
         <div className="mb-4">
@@ -89,7 +81,6 @@ export default function ResetPasswordPage() {
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
-
         <div>
           <label htmlFor="passwordConfirmation" className="block text-sm font-medium text-gray-700">
             Confirm New Password
@@ -104,7 +95,6 @@ export default function ResetPasswordPage() {
             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
-
         <button
           type="submit"
           disabled={isSubmitting}
@@ -120,5 +110,13 @@ export default function ResetPasswordPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner message="Loading..." />}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
