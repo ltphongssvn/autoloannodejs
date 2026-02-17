@@ -1,5 +1,6 @@
-// Add list endpoint to src/routes/loanOfficer.js
+// src/routes/loanOfficer.js
 import { Router } from 'express';
+import { Op } from 'sequelize';
 import { authenticate } from '../middleware/auth.js';
 import { requireStaff } from '../middleware/authorize.js';
 import { Application } from '../models/index.js';
@@ -16,7 +17,7 @@ router.get('/', async (req, res, next) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
     const offset = (page - 1) * limit;
     const { rows, count } = await Application.findAndCountAll({
-      where: { status: ['submitted', 'under_review', 'pending_documents'] },
+      where: { status: { [Op.in]: ['submitted', 'under_review', 'pending_documents'] } },
       limit,
       offset,
       order: [['created_at', 'DESC']],
