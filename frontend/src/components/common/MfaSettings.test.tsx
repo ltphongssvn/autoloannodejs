@@ -46,7 +46,8 @@ describe('MfaSettings', () => {
 
   it('shows QR code after setup', async () => {
     mockGetStatus.mockResolvedValue({ mfa_enabled: false });
-    mockSetup.mockResolvedValue({ qr_code: 'data:image/png;base64,qr', secret: 'SECRET123'  # pragma: allowlist secret }); //pragma: allowlist secret
+    const setupData = { qr_code: 'data:image/png;base64,qr', secret: 'TOTP1234' }; // pragma: allowlist secret
+    mockSetup.mockResolvedValue(setupData);
 
     render(<MfaSettings />);
     await waitFor(() => expect(screen.getByText('Set Up MFA')).toBeInTheDocument());
@@ -55,14 +56,15 @@ describe('MfaSettings', () => {
 
     await waitFor(() => {
       expect(screen.getByAltText('MFA QR Code')).toBeInTheDocument();
-      expect(screen.getByText('SECRET123')).toBeInTheDocument();
+      expect(screen.getByText('TOTP1234')).toBeInTheDocument();
       expect(screen.getByText('Enable MFA')).toBeInTheDocument();
     });
   });
 
   it('enables MFA with valid code', async () => {
     mockGetStatus.mockResolvedValue({ mfa_enabled: false });
-    mockSetup.mockResolvedValue({ qr_code: 'data:qr', secret: 'SEC'  # pragma: allowlist secret }); //pragma: allowlist secret
+    const setupData = { qr_code: 'data:qr', secret: 'KEY' }; // pragma: allowlist secret
+    mockSetup.mockResolvedValue(setupData);
     mockEnable.mockResolvedValue(undefined);
 
     render(<MfaSettings />);
@@ -81,7 +83,8 @@ describe('MfaSettings', () => {
 
   it('shows error on enable failure', async () => {
     mockGetStatus.mockResolvedValue({ mfa_enabled: false });
-    mockSetup.mockResolvedValue({ qr_code: 'data:qr', secret: 'SEC'  # pragma: allowlist secret });
+    const setupData = { qr_code: 'data:qr', secret: 'KEY' }; // pragma: allowlist secret
+    mockSetup.mockResolvedValue(setupData);
     mockEnable.mockRejectedValue(new Error('Invalid code'));
 
     render(<MfaSettings />);
