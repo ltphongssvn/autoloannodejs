@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/services/api';
-import { LoadingSpinner, ErrorAlert } from '@/components/common';
+import { LoadingSpinner, ErrorAlert, MfaSettings } from '@/components/common';
 
 export default function SettingsPage() {
   const { user, setUser, isLoading: authLoading } = useAuth();
@@ -113,7 +113,7 @@ export default function SettingsPage() {
       </section>
 
       {/* Password Section */}
-      <section className="rounded-lg border bg-white p-6">
+      <section className="mb-8 rounded-lg border bg-white p-6">
         <h2 className="mb-4 text-lg font-semibold text-gray-800">Change Password</h2>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
@@ -128,6 +128,12 @@ export default function SettingsPage() {
             {isSubmitting ? 'Changing...' : 'Change Password'}
           </button>
         </form>
+      </section>
+
+      {/* MFA Section */}
+      <section className="rounded-lg border bg-white p-6">
+        <h2 className="mb-4 text-lg font-semibold text-gray-800">Two-Factor Authentication</h2>
+        <MfaSettings />
       </section>
     </div>
   );

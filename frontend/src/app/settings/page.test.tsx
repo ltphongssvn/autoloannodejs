@@ -10,12 +10,14 @@ jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
 }));
 
-jest.mock('@/context/AuthContext', () => ({
-  useAuth: jest.fn(),
-}));
+jest.mock('@/context/AuthContext', () => ({ useAuth: jest.fn() }));
+jest.mock('@/services/api', () => ({ apiFetch: jest.fn() }));
 
-jest.mock('@/services/api', () => ({
-  apiFetch: jest.fn(),
+jest.mock('@/services/mfa', () => ({
+  getMfaStatus: jest.fn().mockResolvedValue({ mfa_enabled: false }),
+  setupMfa: jest.fn(),
+  enableMfa: jest.fn(),
+  disableMfa: jest.fn(),
 }));
 
 const mockSetUser = jest.fn();
@@ -23,35 +25,21 @@ const mockUseAuth = useAuth as jest.MockedFunction<typeof useAuth>;
 const mockApiFetch = apiFetch as jest.MockedFunction<typeof apiFetch>;
 
 const mockUser = {
-  id: 1,
-  email: 'test@example.com',
-  first_name: 'Test',
-  last_name: 'User',
-  phone: '555-1234',
-  role: 'customer' as const,
-  full_name: 'Test User',
-  created_at: '2024-01-01',
+  id: 1, email: 'test@example.com', first_name: 'Test', last_name: 'User',
+  phone: '555-1234', role: 'customer' as const, full_name: 'Test User', created_at: '2024-01-01',
 };
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockUseAuth.mockReturnValue({
-    user: mockUser,
-    setUser: mockSetUser,
-    isAuthenticated: true,
-    isLoading: false,
-    logout: jest.fn(),
+    user: mockUser, setUser: mockSetUser, isAuthenticated: true, isLoading: false, logout: jest.fn(),
   });
 });
 
 describe('SettingsPage', () => {
   it('shows loading while auth loading', () => {
     mockUseAuth.mockReturnValue({
-      user: null,
-      setUser: jest.fn(),
-      isAuthenticated: false,
-      isLoading: true,
-      logout: jest.fn(),
+      user: null, setUser: jest.fn(), isAuthenticated: false, isLoading: true, logout: jest.fn(),
     });
     render(<SettingsPage />);
     expect(screen.getByRole('status')).toBeInTheDocument();
@@ -59,22 +47,19 @@ describe('SettingsPage', () => {
 
   it('redirects to login when not authenticated', () => {
     mockUseAuth.mockReturnValue({
-      user: null,
-      setUser: jest.fn(),
-      isAuthenticated: false,
-      isLoading: false,
-      logout: jest.fn(),
+      user: null, setUser: jest.fn(), isAuthenticated: false, isLoading: false, logout: jest.fn(),
     });
     render(<SettingsPage />);
     expect(mockPush).toHaveBeenCalledWith('/login');
   });
 
-  it('renders profile form with user data', () => {
+  it('renders profile form with user data', async () => {
     render(<SettingsPage />);
     expect(screen.getByText('Settings')).toBeInTheDocument();
     expect(screen.getByLabelText('First Name')).toHaveValue('Test');
     expect(screen.getByLabelText('Last Name')).toHaveValue('User');
     expect(screen.getByLabelText('Phone')).toHaveValue('555-1234');
+    await waitFor(() => expect(screen.getByText('Two-Factor Authentication')).toBeInTheDocument());
   });
 
   it('renders password change form', () => {
@@ -87,8 +72,7 @@ describe('SettingsPage', () => {
   it('updates profile successfully', async () => {
     const updatedUser = { ...mockUser, first_name: 'Updated' };
     mockApiFetch.mockResolvedValue({
-      data: { status: { code: 200 }, data: updatedUser },
-      headers: new Headers(),
+      data: { status: { code: 200 }, data: updatedUser }, headers: new Headers(),
     });
 
     render(<SettingsPage />);
@@ -109,7 +93,7 @@ describe('SettingsPage', () => {
     await userEvent.click(screen.getByText('Save Profile'));
 
     await waitFor(() => {
-      expect(screen.getByText('Server error')).toBeInTheDocument();
+      expect(screen.getAllByText('Server error').length).toBeGreaterThanOrEqual(1);
     });
   });
 
@@ -137,21 +121,25 @@ describe('SettingsPage', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Change Password' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Wrong password')).toBeInTheDocument();
+      expect(screen.getAllByText('Wrong password').length).toBeGreaterThanOrEqual(1);
     });
   });
 
   it('dismisses error', async () => {
-    mockApiFetch.mockRejectedValue(new Error('Error'));
+    mockApiFetch.mockRejectedValue(new Error('Update error'));
 
     render(<SettingsPage />);
     await userEvent.click(screen.getByText('Save Profile'));
 
     await waitFor(() => {
-      expect(screen.getByText('Error')).toBeInTheDocument();
+      expect(screen.getByText('Update error')).toBeInTheDocument();
     });
 
-    await userEvent.click(screen.getByLabelText('Dismiss'));
-    expect(screen.queryByText('Error')).not.toBeInTheDocument();
+    const dismissButtons = screen.getAllByLabelText('Dismiss');
+    await userEvent.click(dismissButtons[0]);
+
+    await waitFor(() => {
+      expect(screen.queryByText('Update error')).not.toBeInTheDocument();
+    });
   });
 });
