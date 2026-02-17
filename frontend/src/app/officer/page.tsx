@@ -26,7 +26,7 @@ export default function LoanOfficerDashboardPage() {
     const fetchApplications = async () => {
       try {
         const { data } = await apiFetch<ApiResponse<Application[]>>(
-          '/loan_officer/applications',
+          '/loan-officer/applications',
         );
         setApplications(data.data);
       } catch (err) {
