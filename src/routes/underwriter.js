@@ -1,5 +1,6 @@
 // src/routes/underwriter.js
 import { Router } from 'express';
+import { Op } from 'sequelize';
 import { authenticate } from '../middleware/auth.js';
 import { requireUnderwriter } from '../middleware/authorize.js';
 import { Application } from '../models/index.js';
@@ -16,7 +17,7 @@ router.get('/', async (req, res, next) => {
     const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
     const offset = (page - 1) * limit;
     const { rows, count } = await Application.findAndCountAll({
-      where: { status: ['under_review'] },
+      where: { status: { [Op.in]: ['under_review'] } },
       limit,
       offset,
       order: [['created_at', 'DESC']],
